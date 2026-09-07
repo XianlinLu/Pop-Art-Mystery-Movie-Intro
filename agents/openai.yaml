@@ -1,0 +1,7 @@
+interface:
+  display_name: "Pop-Art Mystery Movie Intro"
+  short_description: "Create a mystery opening from one theme"
+  brand_color: "#D9271E"
+  default_prompt: "Use $pop-art-mystery-movie-intro to turn my theme into a complete 20–30 second English pop-art mystery-film opening."
+policy:
+  allow_implicit_invocation: true
