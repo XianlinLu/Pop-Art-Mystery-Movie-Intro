@@ -1,7 +1,7 @@
 interface:
   display_name: "Pop-Art Mystery Movie Intro"
-  short_description: "Turn one theme into a pop-art mystery intro"
+  short_description: "Create a Lumina pop-art mystery intro"
   brand_color: "#D9271E"
-  default_prompt: "Use $pop-art-mystery-movie-intro to turn this one theme into a complete 20–30 second English pop-art mystery-film opening in one run: [theme]."
+  default_prompt: "Use $pop-art-mystery-movie-intro in Lumina Canvas to turn this theme into a complete 20–30 second English pop-art mystery-film opening in one run: [theme]."
 policy:
   allow_implicit_invocation: true

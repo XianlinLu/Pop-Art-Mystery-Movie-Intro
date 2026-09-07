@@ -1,6 +1,6 @@
 ---
 name: pop-art-mystery-movie-intro
-description: Create a complete 20–30 second English mystery-film opening from one theme using pop-art noir graphics, evidence-board storytelling, animated typography, sound design, and a media-tool-first workflow that does not require canvas-state access. Use for short title sequences, mystery intros, detective openings, and stylish suspense teasers; not for full trailers or realistic live-action scenes.
+description: Create a complete 20–30 second English mystery-film opening from one theme in Lumina Canvas using pop-art noir graphics, evidence-board storytelling, animated typography, sound design, and an autonomous video workflow. Use for short title sequences, mystery intros, detective openings, and stylish suspense teasers; not for full trailers or realistic live-action scenes.
 ---
 
 # Pop-Art Mystery Movie Intro
@@ -9,41 +9,41 @@ Turn one theme into a finished English-language mystery-film opening. The user s
 
 ## User flow
 
-**Theme → internal concept and storyboard → direct media generation → sound and edit → final 20–30 second video**
+**Theme → internal concept and storyboard → Lumina media workflow → sound and edit → final 20–30 second video**
 
 If the user provides a usable theme, do not ask routine follow-up questions or pause for shot approval. Make confident creative decisions and continue through every production stage. If no theme is present, ask for exactly one theme. Tool unavailability is handled by the fallback below, not by asking the user to type “continue”.
 
 Use English for all generation prompts, production copy, credits, evidence labels, title cards, and on-screen text. A user may write the theme in any language; translate and adapt it internally.
 
-## Runtime strategy: generate first, canvas second
+## Lumina Canvas runtime contract
 
-Treat the canvas as an optional delivery and organization surface, not as a prerequisite for generation. Keep the creative brief, style bible, continuity ledger, and storyboard in working context rather than creating planning-only canvas nodes.
+Lumina's built-in `ba-canvas` Skill is the execution authority for live node types, model keys, schemas, graph writes, and job submission. Use it for production instead of inventing direct media tools or static node definitions. Keep the creative brief, style bible, continuity ledger, and storyboard in working context; do not create planning-only nodes.
 
-Do not inspect, enumerate, refresh, or write canvas graph state merely to plan the task. Do not require a canvas identifier or an environment variable such as `BA_CANVAS_CONFIG`. Do not use a generic Canvas status call to discover whether image, video, audio, or editing capabilities exist. Decide from the concrete tools already exposed to the Agent, then call those concrete image, video, audio, or editing tools directly.
+Run five internal stages without waiting for user replies: **concept → storyboard → media generation → edit and sound → quality check**. Progress UI is optional; never create placeholder nodes solely to display these stages.
 
-Run five internal stages without waiting for user replies: **concept → storyboard → media generation → edit and sound → quality check**. Progress UI is optional; never create placeholder canvas nodes solely to make these stages visible.
+### Mandatory startup gate
 
-Choose the lightest viable production route:
+After the built-in version readiness check, make the first business Canvas call:
 
-1. **Direct render, preferred.** When a video model supports a 20–30 second multi-shot result, compile the concept, visual bible, seven-shot timing, typography, transitions, and sound direction into one production prompt and submit one video task.
-2. **Segmented render.** When the video model has a shorter duration limit, render four connected segments of roughly 5–7 seconds, with the seven story beats distributed across them; create one soundtrack and join the segments. Generate separate keyframes only when the video tool needs image references. Pass tool outputs directly between media tools; do not store every intermediate item as a canvas node.
-3. **Optional canvas delivery.** When canvas writing works, add only the final video and any genuinely useful editable media outputs. Reuse the active canvas automatically. Never create seven administrative progress nodes.
+`ba-canvas get-draft --view graph`
 
-Continue automatically between production stages. Intermediate approvals are not required.
+This is the runtime gate. Do not call `list-models`, `list-nodes`, `get-draft --view overview`, or any write command before it succeeds.
 
-### Canvas failure handling
+- If it returns a success envelope, continue with the built-in generate workflow and query only the node and model information needed for the chosen route.
+- If it reports `BA_CANVAS_CONFIG`, a missing canvas configuration, an unavailable canvas state, or an uninitialized graph, stop after that single failed business call. Do not retry, do not run a different Canvas command, and do not ask the user to type “continue”. Deliver the production-ready fallback defined under Delivery and state that Lumina did not inject the live canvas configuration into this Agent session.
+- A successful `ba-canvas --version` or `list-models` result does not prove that canvas access works; only the successful draft gate does.
 
-If any Canvas call reports `BA_CANVAS_CONFIG`, a missing canvas configuration, an unavailable canvas state, or an uninitialized graph:
+Never claim that this Skill can create or repair `BA_CANVAS_CONFIG`. That value belongs to the Lumina host runtime. This startup gate minimizes wasted calls and prevents retry loops, but an actual live Canvas workflow cannot run without the host configuration.
 
-- stop using the generic Canvas tool immediately;
-- do not retry the same status call;
-- do not ask the user to click or type “continue”;
-- continue through direct image, video, audio, and editing tools;
-- return generated media directly in the Agent response when the platform supports attachments.
+### Production route after the gate succeeds
 
-Make at most one direct media-tool attempt after a Canvas configuration error. If the concrete media tools also fail because they share the same missing runtime configuration, stop retrying and deliver the complete production package described under Delivery. State that rendering is blocked by the host environment, not by the theme or prompt. A Skill cannot create or repair host environment variables.
+Choose the lightest viable Lumina workflow:
 
-Never claim that `BA_CANVAS_CONFIG` has been fixed by this Skill. This workflow prevents unnecessary canvas-state calls and breaks the retry loop; it cannot repair a host deployment whose media tools all depend on the missing variable.
+1. **Single-video render, preferred.** Query the current video catalog and selected model schema. When a compatible model supports a 20–30 second 16:9 result with generated audio, compile the concept, visual bible, seven-shot timing, typography, transitions, and sound direction into one structured director prompt and submit one video node.
+2. **Segmented render.** If the selected model cannot produce the full duration, render four connected segments of roughly 5–7 seconds with the seven story beats distributed across them, then connect them to Lumina's video-compose node in story order. Generate keyframes only when the chosen video mode requires or materially benefits from them.
+3. **Sound boundary.** Prefer a video model's native generated audio for the single-video route. Create a separate audio node only when the live node graph exposes a supported path to the final output; never promise that a standalone soundtrack has been mixed when the compose node cannot do so.
+
+Reuse the active canvas. Submit each generation target once, follow the built-in non-waiting rule for video jobs, and stop after handing off the submitted task. Intermediate approvals are not required.
 
 ## Default format
 
@@ -181,8 +181,8 @@ Repair only the affected shot or overlay when possible. Make up to two focused r
 
 ## Delivery
 
-Deliver the finished video directly as the primary output; successful completion must not depend on creating or updating canvas nodes. When canvas writing is available, attach the final video there as an additional convenience. Keep only useful editable media outputs rather than administrative progress nodes. In the final message, state the film title, duration, and one-sentence mystery premise.
+For the preferred single-video route, the primary output is the Lumina video-generation node and its submitted task. Follow the built-in non-waiting video rule: report the English title, planned runtime, one-sentence mystery premise, and that generation has been submitted. Do not claim the result is finished before Lumina reports a terminal result.
 
-If direct video generation or editing is unavailable, do not claim that a rendered video exists. Deliver the complete creative brief, style bible, timed storyboard, keyframe prompts, motion prompts, exact English text overlays, sound plan, and one combined master video prompt as a production-ready fallback. Do this automatically instead of repeatedly polling Canvas.
+For the segmented route, create and order the connected clip nodes and video-compose node, then state the front-end boundary accurately: Lumina's Canvas CLI can prepare the timeline but cannot confirm playback, trigger export, or verify the exported duration. Never describe an unexported compose node as a finished file.
 
-Successful rendering ends with exactly one primary final video, plus a short report containing the English title, runtime, one-sentence premise, and any material limitation. Do not finish with only a plan when rendering tools succeeded.
+If the startup gate, video generation, or editing is unavailable, do not claim that a rendered video exists. Deliver the complete creative brief, style bible, timed storyboard, keyframe prompts, motion prompts, exact English text overlays, sound plan, and one combined master video prompt as a production-ready fallback. Do this automatically instead of repeatedly polling Canvas.
