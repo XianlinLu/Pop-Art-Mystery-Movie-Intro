@@ -5,26 +5,28 @@ description: Create a complete 20–30 second English mystery-film opening from 
 
 # Pop-Art Mystery Movie Intro
 
-Turn one theme into a finished English-language mystery-film opening. The user supplies only the theme; handle concept development, story structure, visual design, asset generation, animation, sound, editing, and quality control automatically.
+Turn one theme into a finished English-language mystery-film opening. The user supplies only the theme; handle concept development, story structure, visual design, asset generation, animation, sound, editing, and quality control automatically in the same run.
 
 ## User flow
 
 **Theme → internal concept and storyboard → direct media generation → sound and edit → final 20–30 second video**
 
-If the user provides a usable theme, do not ask routine follow-up questions. Make confident creative decisions and continue through every production stage. Ask only when no theme is present or a required tool is genuinely unavailable.
+If the user provides a usable theme, do not ask routine follow-up questions or pause for shot approval. Make confident creative decisions and continue through every production stage. If no theme is present, ask for exactly one theme. Tool unavailability is handled by the fallback below, not by asking the user to type “continue”.
 
 Use English for all generation prompts, production copy, credits, evidence labels, title cards, and on-screen text. A user may write the theme in any language; translate and adapt it internally.
 
-## Runtime strategy: media tools before canvas
+## Runtime strategy: generate first, canvas second
 
-Treat the canvas as an optional display surface, not as a prerequisite for generation. Keep the creative brief, style bible, continuity ledger, and storyboard in working context rather than creating planning-only canvas nodes.
+Treat the canvas as an optional delivery and organization surface, not as a prerequisite for generation. Keep the creative brief, style bible, continuity ledger, and storyboard in working context rather than creating planning-only canvas nodes.
 
-Do not inspect, enumerate, refresh, or write canvas graph state merely to plan the task. Do not require a canvas identifier or an environment variable such as `BA_CANVAS_CONFIG`. Do not use a generic Canvas status call to discover whether image, video, audio, or editing capabilities exist. Use the concrete media-generation capabilities already exposed to the Agent.
+Do not inspect, enumerate, refresh, or write canvas graph state merely to plan the task. Do not require a canvas identifier or an environment variable such as `BA_CANVAS_CONFIG`. Do not use a generic Canvas status call to discover whether image, video, audio, or editing capabilities exist. Decide from the concrete tools already exposed to the Agent, then call those concrete image, video, audio, or editing tools directly.
+
+Run five internal stages without waiting for user replies: **concept → storyboard → media generation → edit and sound → quality check**. Progress UI is optional; never create placeholder canvas nodes solely to make these stages visible.
 
 Choose the lightest viable production route:
 
 1. **Direct render, preferred.** When a video model supports a 20–30 second multi-shot result, compile the concept, visual bible, seven-shot timing, typography, transitions, and sound direction into one production prompt and submit one video task.
-2. **Segmented render.** When the video model has a shorter duration limit, generate only the required keyframes, animate the seven short clips, create one soundtrack, and join them. Pass tool outputs directly between media tools; do not store every intermediate item as a canvas node.
+2. **Segmented render.** When the video model has a shorter duration limit, render four connected segments of roughly 5–7 seconds, with the seven story beats distributed across them; create one soundtrack and join the segments. Generate separate keyframes only when the video tool needs image references. Pass tool outputs directly between media tools; do not store every intermediate item as a canvas node.
 3. **Optional canvas delivery.** When canvas writing works, add only the final video and any genuinely useful editable media outputs. Reuse the active canvas automatically. Never create seven administrative progress nodes.
 
 Continue automatically between production stages. Intermediate approvals are not required.
@@ -40,6 +42,8 @@ If any Canvas call reports `BA_CANVAS_CONFIG`, a missing canvas configuration, a
 - return generated media directly in the Agent response when the platform supports attachments.
 
 Make at most one direct media-tool attempt after a Canvas configuration error. If the concrete media tools also fail because they share the same missing runtime configuration, stop retrying and deliver the complete production package described under Delivery. State that rendering is blocked by the host environment, not by the theme or prompt. A Skill cannot create or repair host environment variables.
+
+Never claim that `BA_CANVAS_CONFIG` has been fixed by this Skill. This workflow prevents unnecessary canvas-state calls and breaks the retry loop; it cannot repair a host deployment whose media tools all depend on the missing variable.
 
 ## Default format
 
@@ -91,7 +95,7 @@ Create a continuity ledger before generating assets. Lock the lead character's f
 
 ## 3. Build the timed storyboard
 
-Use this default 25-second structure. Adjust individual shots slightly when needed while keeping the final duration between 20 and 30 seconds.
+Use this default 25-second structure. Adjust individual shots slightly when needed while keeping the final duration between 20 and 30 seconds. The reference language is structural only: do not copy its title, character names, studio mark, logo, props, or exact layouts.
 
 | Time | Story function | Default visual and motion |
 | --- | --- | --- |
@@ -180,3 +184,5 @@ Repair only the affected shot or overlay when possible. Make up to two focused r
 Deliver the finished video directly as the primary output; successful completion must not depend on creating or updating canvas nodes. When canvas writing is available, attach the final video there as an additional convenience. Keep only useful editable media outputs rather than administrative progress nodes. In the final message, state the film title, duration, and one-sentence mystery premise.
 
 If direct video generation or editing is unavailable, do not claim that a rendered video exists. Deliver the complete creative brief, style bible, timed storyboard, keyframe prompts, motion prompts, exact English text overlays, sound plan, and one combined master video prompt as a production-ready fallback. Do this automatically instead of repeatedly polling Canvas.
+
+Successful rendering ends with exactly one primary final video, plus a short report containing the English title, runtime, one-sentence premise, and any material limitation. Do not finish with only a plan when rendering tools succeeded.
