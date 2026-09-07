@@ -1,7 +1,7 @@
 interface:
   display_name: "Pop-Art Mystery Movie Intro"
-  short_description: "Create a mystery opening from one theme"
+  short_description: "Create a mystery intro with direct media tools"
   brand_color: "#D9271E"
-  default_prompt: "Use $pop-art-mystery-movie-intro to turn my theme into a complete 20–30 second English pop-art mystery-film opening."
+  default_prompt: "Use $pop-art-mystery-movie-intro to turn my theme into a complete 20–30 second English pop-art mystery-film opening; start with direct media tools and do not inspect Canvas state."
 policy:
   allow_implicit_invocation: true
