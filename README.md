@@ -1,12 +1,14 @@
 # Pop-Art Mystery Movie Intro
 
-Turn a single theme into a complete 20–30 second English mystery-film opening. This Skill guides a canvas Agent through concept development, pop-art noir visual design, storyboarding, asset generation, animation, sound design, editing, and final quality control without requiring the user to make decisions at every stage.
+Turn a single theme into a complete 20–30 second English mystery-film opening. This Skill uses a media-tool-first workflow for concept development, pop-art noir visual design, storyboarding, generation, animation, sound, editing, and quality control. It does not require canvas-state access or planning-only canvas nodes.
 
 ## English Introduction
 
 **Pop-Art Mystery Movie Intro** is an autonomous video-production Skill for short cinematic title sequences. The user only needs to enter a theme, such as `a vanished magician`, `the last train at midnight`, or `a letter that arrives twenty years late`.
 
 The Agent expands that theme into an original mystery concept, creates a consistent cast and clue system, and produces a 20–30 second English opening in a striking pop-art noir style. The visual language combines red-and-blue confrontations, angular character silhouettes, evidence-board collages, dossier graphics, screen-print textures, cinematic shadows, and oversized condensed typography. It then generates the shots, animates the poster layers, adds original suspense music and sound effects, assembles the final edit, and checks continuity and text accuracy.
+
+The revised runtime is canvas-light. It prefers one direct multi-shot video task, falls back to short connected clips only when required, and uses concrete image, video, audio, and editing tools without first reading Canvas state. A missing `BA_CANVAS_CONFIG` response is not retried; the Agent skips generic Canvas calls and continues with direct media tools.
 
 ### What the Skill handles automatically
 
@@ -34,6 +36,10 @@ A complete 20–30 second, 16:9 English mystery-film opening with a readable tit
 
 This repository intentionally contains only `.md` and `.yaml` files. It does not include `assets/icon.svg` or any unsupported image, font, video, or script files, so it follows the upload restrictions shown by the canvas Agent.
 
+### Runtime fallback
+
+If the host platform binds every media tool to the same unavailable Canvas runtime, a Skill cannot restore that system configuration. In that case the Agent stops after one media attempt and returns a complete production package instead of entering a “continue generating” loop.
+
 ---
 
 ## 中文介绍
@@ -41,6 +47,8 @@ This repository intentionally contains only `.md` and `.yaml` files. It does not
 **Pop-Art Mystery Movie Intro** 是一个用于自动生成英文悬疑电影片头的画布 Agent Skill。用户只需要输入一个主题，例如“消失的魔术师”“午夜最后一班列车”或“一封迟到二十年的信”，其余创作和制作流程都由 Agent 自动完成。
 
 Agent 会先将主题扩展成原创英文片名、故事钩子、主角、神秘对手、关键地点和核心证物，再建立统一的角色与视觉设定，并制作一支 20–30 秒的英文悬疑片开头。整体风格融合波普艺术电影海报、黑色侦探片和调查档案界面，通过红蓝对峙、剪影人物、证物拼贴、调查线框、丝网印刷颗粒、电影感阴影和超大窄体标题，快速营造悬疑氛围。
+
+新版采用“媒体工具优先、画布状态可选”的运行方式。Agent 会优先提交一次完整的多镜头视频任务；只有视频模型存在时长限制时，才拆分短片并拼接。它不会为了规划任务而读取画布状态，也不会创建七个流程占位节点。遇到 `BA_CANVAS_CONFIG` 缺失时，会立即跳过通用 Canvas 调用，继续使用图片、视频、音频和剪辑工具，不再让用户反复点击“继续生成”。
 
 ### Skill 会自动完成
 
@@ -67,6 +75,10 @@ Agent 会先将主题扩展成原创英文片名、故事钩子、主角、神�
 ### 画布上传兼容性
 
 本仓库只包含画布支持的 `.md` 和 `.yaml` 文件，不包含 `assets/icon.svg`，也不包含图片、字体、视频或脚本，因此不会触发截图中显示的不支持格式问题。
+
+### 运行环境兜底
+
+如果平台把所有媒体工具都绑定在同一个未初始化的 Canvas 运行环境中，Skill 本身无法补充系统环境变量。此时 Agent 最多尝试一次媒体工具，然后输出完整制作方案，不再进入无限“继续生成”循环。
 
 ## Suggested invocation
 
